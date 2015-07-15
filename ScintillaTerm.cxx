@@ -743,7 +743,7 @@ public:
       if (i == n) mvwchgat(w, i - s + 1, 2, width - 1, A_REVERSE, 0, NULL);
     }
     wmove(w, n - s + 1, 1); // place cursor on selected line
-    wrefresh(w);
+    wnoutrefresh(w);
     selection = n;
   }
   /** Returns the currently selected item in the listbox. */
@@ -1126,7 +1126,7 @@ public:
     if (sur) {
       sur->Init(wid);
       ct.PaintCT(sur);
-      wrefresh(_WINDOW(wid));
+      wnoutrefresh(_WINDOW(wid));
       sur->Release();
       delete sur;
     }
@@ -1178,11 +1178,12 @@ public:
     return _WINDOW(wMain.GetID());
   }
   /**
-   * Repaints the Scintilla window.
+   * Repaints the Scintilla window without updating the physical screen
+   * (without `doupdate()`).
    * If an autocompletion list, user list, or calltip is active, redraw it over
    * the buffer's contents.
    */
-  void Refresh() {
+  void NoutRefresh() {
     WINDOW *w = GetWINDOW();
     rcPaint.top = 0, rcPaint.left = 0; // paint from (0, 0), not (begy, begx)
     getmaxyx(w, rcPaint.bottom, rcPaint.right);
@@ -1190,7 +1191,7 @@ public:
       height = rcPaint.bottom, width = rcPaint.right, ChangeSize();
     Paint(sur, rcPaint);
     SetVerticalScrollPos(), SetHorizontalScrollPos();
-    wrefresh(w);
+    wnoutrefresh(w);
 #if PDCURSES
     touchwin(w); // pdcurses sometimes has problems drawing overlapping windows
 #endif
@@ -1408,8 +1409,12 @@ bool scintilla_send_mouse(Scintilla *sci, int event, unsigned int time,
 int scintilla_get_clipboard(Scintilla *sci, char *buffer) {
   return reinterpret_cast<ScintillaTerm *>(sci)->GetClipboard(buffer);
 }
+void scintilla_noutrefresh(Scintilla *sci) {
+  reinterpret_cast<ScintillaTerm *>(sci)->NoutRefresh();
+}
 void scintilla_refresh(Scintilla *sci) {
-  reinterpret_cast<ScintillaTerm *>(sci)->Refresh();
+  reinterpret_cast<ScintillaTerm *>(sci)->NoutRefresh();
+  doupdate();
 }
 void scintilla_delete(Scintilla *sci) {
   delete reinterpret_cast<ScintillaTerm *>(sci);
