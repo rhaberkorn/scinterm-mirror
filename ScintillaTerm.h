@@ -84,6 +84,13 @@ bool scintilla_send_mouse(Scintilla *sci, int event, unsigned int time,
  */
 int scintilla_get_clipboard(Scintilla *sci, char *buffer);
 /**
+ * Refreshes the Scintilla window without updating the physical screen.
+ * This should be done along with the normal curses `noutrefresh()`.
+ * Curses must have been initialized prior to calling this function.
+ * @param sci The Scintilla window returned by `scintilla_new()`.
+ */
+void scintilla_noutrefresh(Scintilla *sci);
+/**
  * Refreshes the Scintilla window.
  * This should be done along with the normal curses `refresh()`, as the physical
  * screen is updated when calling this function.
