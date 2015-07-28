@@ -58,19 +58,49 @@
 // Defines for getting attributes for INDIC_ROUNDBOX and INDIC_STRAIGHTBOX.
 // These are specific to curses implementations.
 #if NCURSES_VERSION_MAJOR
-#if (defined(NCURSES_WIDECHAR) || defined(_XOPEN_SOURCE_EXTENDED))
-#define wattrget(w, y, x) (w)->_line[(y)].text[(x)].attr
+
+// The following preprocessor trickery is necessary
+// in order to sanitize the value of NCURSES_WIDECHAR
+// which could be 0, 1 (newer ncurses), undefined or
+// defined but empty.
+// We cannot rely on feature test macros like
+// _XOPEN_SOURCE_EXTENDED since they may be ignored by
+// newer ncurses versions if NCURSES_WIDECHAR is defined
+// before including curses.h. This seems to be the new
+// way of requesting widechar support but it will not
+// work on older ncurses versions.
+// Nevertheless ncurses.h will always define NCURSES_WIDECHAR
+// (either to 1 or empty) after checking for widechar support.
+#define __EMPTY(X) 1 ## X
+#define EMPTY(X)   (__EMPTY(X) == 1)
+
+#ifndef NCURSES_WIDECHAR
+#define NCURSES_WIDECHAR 0
+#elif EMPTY(NCURSES_WIDECHAR)
+#undef NCURSES_WIDECHAR
+#define NCURSES_WIDECHAR 1
+#endif
+
+#undef EMPTY
+#undef __EMPTY
+
 #undef NCURSES_CH_T
+
+#if NCURSES_WIDECHAR
+#define wattrget(w, y, x) (w)->_line[(y)].text[(x)].attr
 #define NCURSES_CH_T cchar_t
 #else
 #define wattrget(w, y, x) (w)->_line[(y)].text[(x)]
+#define NCURSES_CH_T chtype
 #endif
+
 struct ldat {
   NCURSES_CH_T *text;
   NCURSES_SIZE_T firstchar;
   NCURSES_SIZE_T lastchar;
   NCURSES_SIZE_T oldindex;
 };
+
 #elif PDCURSES
 #define wattrget(w, y, x) (w)->_y[(y)][(x)]
 #else
