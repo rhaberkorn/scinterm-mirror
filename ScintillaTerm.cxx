@@ -672,7 +672,8 @@ void Window::Destroy() {
  * @return PRectangle with the window's boundaries.
  */
 PRectangle Window::GetPosition() {
-  return PRectangle(0, 0, getmaxx(_WINDOW(wid)), getmaxy(_WINDOW(wid)));
+  return PRectangle(0, 0, wid ? getmaxx(_WINDOW(wid)) : 0,
+                          wid ? getmaxy(_WINDOW(wid)) : 0);
 }
 /**
  * Sets the position of the window relative to its parent window.
