@@ -1224,6 +1224,8 @@ public:
     }
     return 0;
   }
+  /** Tickers are not supported and cannot be supported. */
+  void SetTicking(bool on) {}
 
   /**
    * Returns the curses `WINDOW` associated with this Scintilla instance.
